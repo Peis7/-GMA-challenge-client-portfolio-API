@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: mongo:5.0
+    command: mongod --port 27018
+    ports:
+      - 27018:27018
+    environment:
+      MONGO_INITDB_DATABASE: client_portfolios
+    volumes:
+      - ./mongo-init-script/:/docker-entrypoint-initdb.d/:ro
+      - ./test-data/client_portfolio.json:/test-data/client_portfolio.json:ro
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    networks:
+      - backend
+    env_file: .env
+    container_name: mongodb_client_portfolio
+
+  api:
+    build: ./
+    ports:
+      - 5001:5001
+    volumes:
+      - ./src:/src
+    networks:
+      - backend
+    env_file: .env
+    container_name: client_portfolio_api
+
+networks:
+  backend:
+    name: bff_backend
+    external: true
+    driver: bridge
